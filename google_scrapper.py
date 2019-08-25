@@ -4,7 +4,8 @@ import argparse
 import urllib
 from urllib import parse
 
-from botocore.vendored import requests
+import requests
+# from botocore.vendored import requests
 from bs4 import BeautifulSoup
 
 parser = argparse.ArgumentParser()
