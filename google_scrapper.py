@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import argparse
 import urllib
 from urllib import parse
 
 import requests
 from bs4 import BeautifulSoup
 
-
-import argparse
 parser = argparse.ArgumentParser()
 
 # -url GOOGLE_SEARCH_URL -m 1/0
 parser.add_argument("-url", "--url", help="Google Search URL", required=True)
 parser.add_argument("-m", "--is_mobile", help="Is mobile?", type=int, default=0)
+
 
 def scrape(url=None, is_mobile=0):
     __results = []
@@ -27,14 +27,15 @@ def scrape(url=None, is_mobile=0):
         USER_AGENT = {
             'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1'}
     else:
-        USER_AGENT = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'}
+        USER_AGENT = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'}
 
-    r = requests.get(url=args.url, headers= USER_AGENT)
+    r = requests.get(url=args.url, headers=USER_AGENT)
     html_text = BeautifulSoup(r.content, 'html.parser')
 
     def get_target_url(url_str):
         if '/aclk?' in url_str or '/search?' in url_str:
-            __r = requests.get('https://www.google.com{0}'.format(url_str), headers= USER_AGENT)
+            __r = requests.get('https://www.google.com{0}'.format(url_str), headers=USER_AGENT)
             if len(__r.history) == 0:
                 return None
 
@@ -74,11 +75,13 @@ def scrape(url=None, is_mobile=0):
             if g.get('id') in ['taw', 'bottomads']:
                 if g.find('ol'):
                     for _g in g.find('ol').findAll('li', recursive=False):
-                        __url = get_target_url(_g.find('div', {'class': 'ad_cclk'}).findAll('a', recursive=False)[1]['href'])
+                        __url = get_target_url(
+                            _g.find('div', {'class': 'ad_cclk'}).findAll('a', recursive=False)[1]['href'])
                         if __url:
                             __results.append(['ad', __url])
 
     return __results
+
 
 if __name__ == '__main__':
     for rec in scrape():
