@@ -1,7 +1,7 @@
 import json
-import google_scrapper
+from google_scrapper import GoogleCrawler
 
-g_scrapper = google_scrapper
+#g_scrapper = google_scrapper
 
 
 def lambda_handler(event, context):
@@ -9,7 +9,9 @@ def lambda_handler(event, context):
     __is_mobile = event['queryStringParameters'].get('m', '0')
     __is_mobile = int(__is_mobile)
 
-    results = g_scrapper.scrape(url=__url, is_mobile=__is_mobile)
+    google_crawler = GoogleCrawler(__url, __is_mobile)
+
+    results = google_crawler.run()
 
     return {
         'statusCode': 200,
