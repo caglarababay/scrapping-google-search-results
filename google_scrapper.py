@@ -57,8 +57,11 @@ class GoogleCrawler:
                 item = _g.find('a')
                 if item and item.get('href'):
                     __url = self._get_target_url(item['href'])
-                    if __url and item.get('data-rw'):
-                        self.__results.append(['ad', __url])
+                    if __url is None:
+                        continue
+
+                    if item.get('data-rw'):
+                        self.__results.append(['ad', self._get_target_url(__url)])
                     else:
                         self.__results.append(['organic', __url])
 
@@ -99,14 +102,17 @@ class GoogleCrawler:
             last_redirect_url = __r.history[-1].url
             parsed = parse.parse_qs(parse.urlparse(last_redirect_url).query)
 
-            try:
-                if parsed.get('adurl') is not None and 'https://ad.doubleclick.net' in last_redirect_url:
-                    url2 = urllib.parse.unquote(last_redirect_url)
-                    return url2.split(';')[-1].split('?')[1]
+            if parsed.get('adurl'):
+                return parsed['adurl'][0]
 
-                return parsed.get['adurl'][0]
-            except Exception as e:
-                print("some url is not parsed -> ", e)
+            if 'https://ad.doubleclick.net' in last_redirect_url:
+                url2 = urllib.parse.unquote(last_redirect_url)
+                return url2.split(';')[-1].split('?')[1]
+
+            if '/aclk?' in last_redirect_url:
+                return None
+
+            return last_redirect_url
 
         return url_str
 
@@ -117,10 +123,10 @@ class GoogleCrawler:
         """
 
         html_text = self._get_html_content()
+
         try:
             if self._is_mobile == 1:
                 self._parse_mobile_content(html_text)
-
             else:
                 self._parse_web_content(html_text)
         except Exception as e:
