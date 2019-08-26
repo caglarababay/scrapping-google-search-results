@@ -4,6 +4,7 @@
 import urllib
 from urllib import parse
 
+# from botocore.vendored import requests
 import requests
 from bs4 import BeautifulSoup
 
@@ -62,7 +63,7 @@ class GoogleCrawler:
 
                     if item.get('data-rw'):
                         self.__results.append(['ad', self._get_target_url(__url)])
-                    else:
+                    elif __url != '#':
                         self.__results.append(['organic', __url])
 
     def _parse_web_content(self, html_text):
